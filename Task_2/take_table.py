@@ -33,7 +33,7 @@ class TakeTableFromDoc:
 
     def parse_table(self, doc):
         first_h2 = 0
-        own_text = "ВЕДОМСТВЕННАЯ СТРУКТУРА РАСХОДОВ ОБЛАСТНОГО БЮДЖЕТА"
+        own_text = "ВЕДОМСТВЕННАЯ СТРУКТУРА РАСХОДОВ ОБЛАСТНОГО БЮДЖЕТА НА"
         flag = False
         count = 1
         table = ''
@@ -47,7 +47,7 @@ class TakeTableFromDoc:
                 first_h2 = i
             elif el and flag:
                 for ind, val in enumerate(soup):
-                    if first_h2 <= ind <= i+1:
+                    if first_h2 <= ind < i:
                         table += str(val)
                 print(f'Получили таблицу - {count}')
                 count += 1
