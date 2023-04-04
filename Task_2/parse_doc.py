@@ -1,9 +1,7 @@
 """
 Тут я сделал простенький парсер CNTD для доков с известным идентификатором
 """
-import datetime
 import time
-
 import requests
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -48,12 +46,13 @@ class ParseDoc:
         }
         self.API_URI = "https://docs.cntd.ru/api/document/{}/content/text/block/{}?strict=true"  # doc_id, num_page
 
-    def start_parse(self, doc_id: int, name: str):
-        self.name = name
+    def start_parse(self, doc_id: int, name: str, reg: int):
+        name = "_".join(name.split(" "))
         self.doc_id = doc_id
         amount = self.get_amount()
         store = self.get_pages(amount)
-        self.save_txt(store)
+        file_name = self.save_txt(store, name, reg)
+        return file_name
 
     def get_amount(self):  # Возвращает количество страниц для парсинга
         driver = uc.Chrome()
@@ -72,7 +71,10 @@ class ParseDoc:
             item = self.parse_page(i)
             time.sleep(0.5)
             store += item
-            print(f'***Получили страницу {i} ***')
+            text = f'***Получили страницу {i} ***'
+            print('\b' * len(text), end='', flush=True)
+            print(text, end='', flush=True)
+
         return store
 
     def parse_page(self, num_page: int):
@@ -83,14 +85,10 @@ class ParseDoc:
             response = requests.get(self.API_URI.format(self.doc_id, num_page))
         return response.text
 
-    def save_txt(self, store: str):
-        day = datetime.datetime.today().strftime("%d-%m-%Y__%H-%M")
+    def save_txt(self, store: str, name: str, reg: int):
+        file_name = f'./src/budget/{reg}_Бюджеты__{name}.html'
 
-        with open(f'./src/{self.name}_{day}.txt', 'w', encoding='utf-8') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write(store)
 
-
-if __name__ == "__main__":
-    # ParseDoc().start_parse(406380321, "Бюджеты Свердловской")
-    # ParseDoc().start_parse(406486110, "Бюджеты Белгородской")
-    ParseDoc().start_parse(467981947, "Бюджеты Томской")
+        return file_name
