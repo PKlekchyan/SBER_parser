@@ -22,12 +22,17 @@ class TakeTableFromDoc:
         doc = self.open_doc(path)
         print("Открыли документ")
 
-        table = self.parse_table(doc)
-        if table:
-            print("Получили все совпадения")
-        else:
-            print("Совпадений нет")
-            raise ValueError
+        try:
+            table = self.parse_table(doc, 1)
+            if not table:
+                raise ValueError
+        except:
+            table = self.parse_table(doc, 0)
+            if table:
+                print("Получили все совпадения")
+            else:
+                print("Совпадений нет")
+                raise ValueError
 
         nl_tb = self.normalize_tb(table)
         print("Нормализовали таблицы")
@@ -42,8 +47,9 @@ class TakeTableFromDoc:
             doc = f.read()
         return doc
 
-    def parse_table(self, doc):
+    def parse_table(self, doc, tag):
         first_h2 = 0
+        tag = "h2" if tag else "h3"  # Передаем bool - 1(h2), 0(h3)
 
         # pattern = r'ВЕДОМСТВЕН\w* СТРУКТУР\w* РАСХОД\w* ОБЛАСТН\w* БЮДЖЕТ\w*'
         pattern = r'ВЕДОМСТВЕН\w* СТРУКТУР\w*'
@@ -55,7 +61,7 @@ class TakeTableFromDoc:
 
         for i, v in enumerate(soup):
             new_soap = BeautifulSoup(str(v), "html.parser")
-            el = new_soap.find("h2")
+            el = new_soap.find(tag)
 
             if el and not flag:
                 first_h2 = i
