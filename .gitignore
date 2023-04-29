@@ -1,3 +1,5 @@
 **/__pycache__/
 **/.idea/
 .env
+tables/t2/*.html
+tables/t3/*.xlsx
